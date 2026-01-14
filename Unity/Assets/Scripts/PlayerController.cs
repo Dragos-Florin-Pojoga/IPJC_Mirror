@@ -1,5 +1,10 @@
+//Obligatory comment because
+using System.Globalization;
+using System.IO;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
+using static UnityEngine.Rendering.DebugUI;
 
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(StatController))]
@@ -37,6 +42,12 @@ public class PlayerControllerClean : MonoBehaviour, IDamageable
     // IDamageable implementation
     public StatController GetStatController() => m_stats;
     public Transform GetTransform() => transform;
+    public void ChangeSens()
+    {
+        string text = File.ReadAllText("settings.txt");
+        float value = float.Parse(text, CultureInfo.InvariantCulture);
+        m_mouseSensitivity=value;
+    }
 
     public void TakeHit(HitContext context)
     {
@@ -68,7 +79,11 @@ public class PlayerControllerClean : MonoBehaviour, IDamageable
             OnPlayerDeath();
         }
     }
-
+    private void Exit()
+    {
+        string BackButton = "Main menu";
+        SceneManager.LoadScene(BackButton);
+    }
     private void OnPlayerDeath()
     {
         Debug.Log("Player has died!");
@@ -131,9 +146,14 @@ public class PlayerControllerClean : MonoBehaviour, IDamageable
         HandleLook();
         HandleMovement();
         HandleGravity();
+        HandleCancel();
     }
 
-
+    private void HandleCancel()
+    {
+        bool cancelInputHeld = m_controls.Player.Cancel.IsPressed();
+        if (cancelInputHeld) Exit();
+    }
     private void HandleJump()
     {
         bool jumpInputHeld = m_controls.Player.Jump.IsPressed();
